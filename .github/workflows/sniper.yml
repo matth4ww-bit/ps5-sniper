@@ -1,0 +1,40 @@
+name: PS5 sniper
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # co 5 minut (GitHub czasem się spóźnia)
+  workflow_dispatch:         # przycisk "Run workflow" do ręcznego testu
+
+concurrency:
+  group: ps5-sniper
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalacja
+        run: |
+          pip install playwright requests
+          python -m playwright install --with-deps chromium
+
+      - name: Sprawdzenie
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: xvfb-run -a python ps5_sniper.py --raz
+
+      - name: Zrzut ekranu przy błędzie
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug
+          path: debug_*.png
+          if-no-files-found: ignore
+          retention-days: 2
