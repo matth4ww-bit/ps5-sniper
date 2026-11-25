@@ -1,0 +1,12 @@
+name: Test dostepu
+on: workflow_dispatch
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          U="https://www.mediaexpert.pl/gaming/playstation-5/konsole-ps5/konsola-sony-playstation-5-slim-e-chassis-1tb-kontroler-sony-dualsense-bialy-grand-theft-auto-vi-pakiet-vintage-vice-cit"
+          curl -s -L -o p.html -w "HTTP %{http_code}\n" -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" -H "Accept-Language: pl-PL,pl;q=0.9" "$U"
+          echo "TYTUL: $(grep -o '<title>[^<]*' p.html | head -1)"
+          for w in "Cierpliwo" "chwilowo niedost" "Odbierz w sklepie" "Dodaj do koszyka" "3 799"; do echo "$w: $(grep -c "$w" p.html)"; done
+          wc -c p.html
